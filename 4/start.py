@@ -37,6 +37,29 @@ class AlienInvasion:
         self._create_fleet()
         self.start_game()
         self.play_button=Button(self, 'Play')
+        self.b1=Button(self, '1')
+        self.b2=Button(self, '2')
+        self.b3=Button(self, '3')
+        self.b4=Button(self, '4')
+        self.b5=Button(self, '5')
+        self.buttons_pos()
+    def buttons_pos(self):
+        self.b1.rect.centerx=self.screen.get_rect().centerx
+        self.b2.rect.centerx=self.screen.get_rect().centerx
+        self.b3.rect.centerx=self.screen.get_rect().centerx
+        self.b4.rect.centerx=self.screen.get_rect().centerx
+        self.b5.rect.centerx=self.screen.get_rect().centerx
+        self.b1.rect.top=200
+        self.b2.rect.top=self.b1.rect.bottom+20
+        self.b3.rect.top=self.b2.rect.bottom+20
+        self.b4.rect.top=self.b3.rect.bottom+20
+        self.b5.rect.top=self.b4.rect.bottom+20
+        self.b1.msg_image_rect.top=200
+        self.b2.msg_image_rect.top=self.b1.msg_image_rect.top+70
+        self.b3.msg_image_rect.top=self.b2.msg_image_rect.top+70
+        self.b4.msg_image_rect.top=self.b3.msg_image_rect.top+70
+        self.b5.msg_image_rect.top=self.b4.msg_image_rect.top+70
+
 
     def _create_fleet(self):
         """Створення флота прибульців"""
@@ -83,10 +106,11 @@ class AlienInvasion:
         """Запуск основного цикла игры"""
         while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            if self.stats.game_active:
-                self._update_aliens()
+            if not self.settings.ask:
+                self.ship.update()
+                self._update_bullets()
+                if self.stats.game_active:
+                    self._update_aliens()
             self._update_screen()
 
     def _check_events(self):
@@ -100,15 +124,31 @@ class AlienInvasion:
                 self._check_keyup_events(event)  
             elif event.type==pygame.MOUSEBUTTONDOWN:
                 mouse_pos=pygame.mouse.get_pos()
+                if self.settings.ask:
+                    self.check_buttons(mouse_pos)
                 self._check_play_button(mouse_pos)
+
 
     def _check_play_button(self, mouse_pos):
         button_click=self.play_button.rect.collidepoint(mouse_pos)
         if button_click and self.settings.draw_button:
             self.stats.game_active=True
             self.start_game()
+    def check_buttons(self, mouse_pos):
+        if self.settings.ask:
+            button_click=[]
+            button_click.append(self.b1.rect.collidepoint(mouse_pos))
+            button_click.append(self.b2.rect.collidepoint(mouse_pos))
+            button_click.append(self.b3.rect.collidepoint(mouse_pos))
+            button_click.append(self.b4.rect.collidepoint(mouse_pos))
+            button_click.append(self.b5.rect.collidepoint(mouse_pos))
+            for button in button_click:
+                if button:
+                    self.settings.hardness=button_click.index(button)+1
+                    self.settings.ask=False
     def start_game(self):
         if self.stats.game_active:
+            self.settings.ask=True
             self.ship=Ship(self)
             self.settings.initialyse_dynamic_settings()
             self.stats.reset_stats()
@@ -122,7 +162,7 @@ class AlienInvasion:
             self._create_fleet()
             self.ship.center_ship()
 
-            pygame.mouse.set_visible(False)
+            pygame.mouse.set_visible(True)
         else:
             self.ship=Ship(self)
             self.settings.b_missed=0
@@ -262,12 +302,20 @@ class AlienInvasion:
     def _update_screen(self):
         """Обновляет изображения на экране и отображает новый экран"""
         if self.stats.game_active:
-            self.screen.fill(self.settings.bg_color)
-            self.ship.blitme()
-            for bullet in self.bullets.sprites():
-                bullet.draw_bullet()
-            self.aliens.draw(self.screen)
-            self.sb.show_score()
+            if not self.settings.ask:
+                self.screen.fill(self.settings.bg_color)
+                self.ship.blitme()
+                for bullet in self.bullets.sprites():
+                    bullet.draw_bullet()
+                self.aliens.draw(self.screen)
+                self.sb.show_score()
+            else:
+                self.screen.fill(self.settings.bg_color)
+                self.b1.draw_button()
+                self.b2.draw_button()
+                self.b3.draw_button()
+                self.b4.draw_button()
+                self.b5.draw_button()
         else:
             self.screen.fill(self.settings.bg_color)
             if self.settings.draw_button:

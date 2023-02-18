@@ -27,6 +27,7 @@ class Settings:
         self.draw_button=True
         self.b_missed=0
         self.gr_rect_drop_speed=2
+        self.ask=False
 
         self.initialyse_dynamic_settings()
 
