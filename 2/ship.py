@@ -11,14 +11,15 @@ class Ship(Sprite):
         self.settings=ai_game.settings
         #Загружает изображение корабля и получает прямоугольник
         if self.game.stats.game_active:
-            self.image=pygame.image.load('images/ship.bmp')
+            self.image=pygame.image.load('2/images/ship.bmp')
         else:
-            self.image=pygame.image.load('images/ship.bmp')
+            self.image=pygame.image.load('2/images/ship2.bmp')
         self.rect=self.image.get_rect()
         # Каждый новый корабль появляется у нижнего края экрана
         self.rect.midbottom=self.screen_rect.midbottom
 
         self.x=float(self.rect.x)
+        self.y=float(self.rect.y)
         #Флаг перемещения
         self.moving_right=False
         self.moving_left=False
@@ -37,17 +38,17 @@ class Ship(Sprite):
             #Обновление атрибута rect на основе self.x
             self.rect.x=self.x
         else:
-            if self.moving_up and self.rect.top<self.screen_rect.top:
-                self.y+=self.settings.ship_speed
-            if self.moving_down and self.rect.bottom>self.screen_rect.bottom:
+            if self.moving_up and self.rect.top>self.screen_rect.top:
                 self.y-=self.settings.ship_speed
+            if self.moving_down and self.rect.bottom<self.screen_rect.bottom:
+                self.y+=self.settings.ship_speed
             #Обновление атрибута rect на основе self.x
             self.rect.y=self.y            
     def blitme(self):
         '''Рисует корабль в текущей позиции'''
         self.screen.blit(self.image, self.rect)
     def center_ship(self):
-        if not self.game.stats.game_active:
+        if self.game.stats.game_active:
             self.rect.midbottom=self.screen_rect.midbottom
             self.x=float(self.rect.x)
         else:

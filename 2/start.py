@@ -83,10 +83,9 @@ class AlienInvasion:
         """Запуск основного цикла игры"""
         while True:
             self._check_events()
-
+            self.ship.update()
+            self._update_bullets()
             if self.stats.game_active:
-                self.ship.update()
-                self._update_bullets()
                 self._update_aliens()
             self._update_screen()
 
@@ -105,11 +104,12 @@ class AlienInvasion:
 
     def _check_play_button(self, mouse_pos):
         button_click=self.play_button.rect.collidepoint(mouse_pos)
-        if button_click:
+        if button_click and self.settings.draw_button:
             self.stats.game_active=True
             self.start_game()
     def start_game(self):
-        if not self.stats.game_active:
+        if self.stats.game_active:
+            self.ship=Ship(self)
             self.settings.initialyse_dynamic_settings()
             self.stats.reset_stats()
             self.sb._prep_score()
@@ -124,9 +124,10 @@ class AlienInvasion:
 
             pygame.mouse.set_visible(False)
         else:
-            self.stats.reset_stats()
+            self.ship=Ship(self)
+            self.settings.b_missed=0
             self.ship.center_ship()
-            pygame.mouse.set_visible(False)
+            pygame.mouse.set_visible(True)
     def _check_keydown_events(self, event):
         """Реагирует на нажатие клавиш"""
         if self.stats.game_active:
@@ -140,6 +141,7 @@ class AlienInvasion:
                 self._fire_bullet()
             elif event.key==pygame.K_p:
                 if not self.stats.game_active:
+                    self.stats.game_active=True
                     self.start_game()
         else:
             if event.key == pygame.K_UP:
@@ -162,8 +164,12 @@ class AlienInvasion:
         """Реагирует на отпускание клавиш"""
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
-        elif event.key == pygame.K_LEFT:
+        if event.key == pygame.K_LEFT:
             self.ship.moving_left = False
+        if event.key==pygame.K_UP:
+            self.ship.moving_up=False
+        if event.key==pygame.K_DOWN:
+            self.ship.moving_down=False
 
     def _fire_bullet(self):
         """Создание нового снаряда и включение его в группу bullets"""
@@ -186,7 +192,10 @@ class AlienInvasion:
             for bullet in self.bullets.copy():
                 if bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
-                    self.b_missed+=1
+                    self.settings.b_missed+=1
+                    if self.settings.b_missed==3:
+                        self.settings.draw_button=True
+                        self.settings.b_missed=0
 
 
     def _check_bullet_alien_collisions(self):
@@ -257,8 +266,19 @@ class AlienInvasion:
             self.aliens.draw(self.screen)
             self.sb.show_score()
         else:
-            self.play_button.draw_button()
-            self.gr_rect.draw()
+            self.screen.fill(self.settings.bg_color)
+            if self.settings.draw_button:
+                self.play_button.draw_button()
+                self.ship.center_ship()
+                self.gr_rect.start_pos()
+                self.ship.blitme()
+                self.gr_rect.draw()
+            else:
+                self.ship.blitme()
+                self.gr_rect.update()
+                self.gr_rect.draw()
+                for bullet in self.bullets.sprites():
+                    bullet.draw_bullet()
         # Отображение последнего прорисованного экрана
         pygame.display.flip()
 

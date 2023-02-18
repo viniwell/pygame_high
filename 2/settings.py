@@ -24,13 +24,14 @@ class Settings:
 
         self.speed_up_scale=1.3
         self.score_scale=1.5
-
+        self.draw_button=True
+        self.b_missed=0
 
         self.initialyse_dynamic_settings()
 
 
     def initialyse_dynamic_settings(self):
-        self.ship_speed= 5
+        self.ship_speed=5
         self.bullet_speed=10
         self.alien_speed=1.5
         self.fleet_direction=1

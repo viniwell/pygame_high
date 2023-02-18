@@ -8,7 +8,7 @@ class Alien(Sprite):
         self.screen=ai_game.screen
         self.settings=ai_game.settings  
         #завантаження зображення прибульця та призначення атр rect
-        self.image=pygame.image.load('images/alien.bmp')
+        self.image=pygame.image.load('2/images/alien.bmp')
         self.rect=self.image.get_rect()
         #Кожен новий прибулець з'являється у лів верхньому куті
         self.rect.x=self.rect.width
