@@ -190,6 +190,8 @@ class AlienInvasion:
             self._check_bullet_alien_collisions()
         else:
             for bullet in self.bullets.copy():
+                if bullet.rect.collidepoint((self.gr_rect.rect.x, self.gr_rect.rect.y)):
+                    self.bullets.remove(bullet)
                 if bullet.rect.left >= self.settings.screen_width:
                     self.bullets.remove(bullet)
                     self.settings.b_missed+=1
@@ -199,22 +201,23 @@ class AlienInvasion:
 
 
     def _check_bullet_alien_collisions(self):
-        # Перевірка потраплянь у прибульців
-        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
-        if collisions:
-            for aliens in collisions.values():
-                self.stats.score+=self.settings.alien_points*len(aliens           )
-            self.sb._prep_score()
-            self.sb.check_high_score()
-        if not self.aliens:
-            # Знищення існуючих снарядів та створення нового флоту
-            self.bullets.empty()
-            sleep(0.1)
-            self._create_fleet()
-            self.settings.increase_speed()
+        if self.stats.game_active:
+            # Перевірка потраплянь у прибульців
+            collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+            if collisions:
+                for aliens in collisions.values():
+                    self.stats.score+=self.settings.alien_points*len(aliens           )
+                self.sb._prep_score()
+                self.sb.check_high_score()
+            if not self.aliens:
+                # Знищення існуючих снарядів та створення нового флоту
+                self.bullets.empty()
+                sleep(0.1)
+                self._create_fleet()
+                self.settings.increase_speed()
 
-            self.stats.level+=1
-            self.sb.prep_level()
+                self.stats.level+=1
+                self.sb.prep_level()
 
     def _update_aliens(self):
         """Оновлює позиції всіх прибільців з флоту"""
