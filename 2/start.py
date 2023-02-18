@@ -10,6 +10,7 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from button import Button
+from gr_rect import Gr_rect
 
 
 class AlienInvasion:
@@ -32,9 +33,9 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
-
+        self.gr_rect=Gr_rect(self)
         self._create_fleet()
-
+        self.start_game()
         self.play_button=Button(self, 'Play')
 
     def _create_fleet(self):
@@ -104,35 +105,58 @@ class AlienInvasion:
 
     def _check_play_button(self, mouse_pos):
         button_click=self.play_button.rect.collidepoint(mouse_pos)
-        if button_click and not self.stats.game_active:
+        if button_click:
+            self.stats.game_active=True
             self.start_game()
     def start_game(self):
-        self.settings.initialyse_dynamic_settings()
-        self.stats.reset_stats()
-        self.sb._prep_score()
-        self.sb.prep_level()
-        self.sb.prep_ships()
-        self.stats.game_active=True
+        if not self.stats.game_active:
+            self.settings.initialyse_dynamic_settings()
+            self.stats.reset_stats()
+            self.sb._prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
+            self.stats.game_active=True
 
-        self.aliens.empty()
-        self.bullets.empty()
-        self._create_fleet()
-        self.ship.center_ship()
+            self.aliens.empty()
+            self.bullets.empty()
+            self._create_fleet()
+            self.ship.center_ship()
 
-        pygame.mouse.set_visible(False)
+            pygame.mouse.set_visible(False)
+        else:
+            self.stats.reset_stats()
+            self.ship.center_ship()
+            pygame.mouse.set_visible(False)
     def _check_keydown_events(self, event):
         """Реагирует на нажатие клавиш"""
-        if event.key == pygame.K_RIGHT:
-            self.ship.moving_right = True
-        elif event.key == pygame.K_LEFT:
-            self.ship.moving_left = True
-        elif event.key == pygame.K_ESCAPE:
-            sys.exit()
-        elif event.key == pygame.K_SPACE:
-            self._fire_bullet()
-        elif event.key==pygame.K_p:
-            if not self.stats.game_active:
-                self.start_game()
+        if self.stats.game_active:
+            if event.key == pygame.K_RIGHT:
+                self.ship.moving_right = True
+            elif event.key == pygame.K_LEFT:
+                self.ship.moving_left = True
+            elif event.key == pygame.K_ESCAPE:
+                sys.exit()
+            elif event.key == pygame.K_SPACE:
+                self._fire_bullet()
+            elif event.key==pygame.K_p:
+                if not self.stats.game_active:
+                    self.start_game()
+        else:
+            if event.key == pygame.K_UP:
+                self.ship.moving_up = True
+                self.settings.draw_button=False
+            elif event.key == pygame.K_DOWN:
+                self.ship.moving_down = True
+                self.settings.draw_button=False
+            elif event.key == pygame.K_ESCAPE:
+                sys.exit()
+            elif event.key == pygame.K_SPACE:
+                self._fire_bullet()
+                self.settings.draw_button=False
+            elif event.key==pygame.K_p:
+                if not self.stats.game_active:
+                    self.stats.game_active=True
+                    self.start_game()
 
     def _check_keyup_events(self, event):
         """Реагирует на отпускание клавиш"""
@@ -152,11 +176,18 @@ class AlienInvasion:
         self.bullets.update()
 
         # Удаление снарядов, вішедших за край экрана
-        for bullet in self.bullets.copy():
-            if bullet.rect.bottom <= 0:
-                self.bullets.remove(bullet)
-        
-        self._check_bullet_alien_collisions()
+        if self.stats.game_active:
+            for bullet in self.bullets.copy():
+                if bullet.rect.bottom <= 0:
+                    self.bullets.remove(bullet)
+            
+            self._check_bullet_alien_collisions()
+        else:
+            for bullet in self.bullets.copy():
+                if bullet.rect.left >= self.settings.screen_width:
+                    self.bullets.remove(bullet)
+                    self.b_missed+=1
+
 
     def _check_bullet_alien_collisions(self):
         # Перевірка потраплянь у прибульців
@@ -218,15 +249,16 @@ class AlienInvasion:
 
     def _update_screen(self):
         """Обновляет изображения на экране и отображает новый экран"""
-        self.screen.fill(self.settings.bg_color)
-        self.ship.blitme()
-        for bullet in self.bullets.sprites():
-            bullet.draw_bullet()
-        self.aliens.draw(self.screen)
-        self.sb.show_score()
-        if not self.stats.game_active:
+        if self.stats.game_active:
+            self.screen.fill(self.settings.bg_color)
+            self.ship.blitme()
+            for bullet in self.bullets.sprites():
+                bullet.draw_bullet()
+            self.aliens.draw(self.screen)
+            self.sb.show_score()
+        else:
             self.play_button.draw_button()
-
+            self.gr_rect.draw()
         # Отображение последнего прорисованного экрана
         pygame.display.flip()
 
