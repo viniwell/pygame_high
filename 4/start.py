@@ -144,7 +144,8 @@ class AlienInvasion:
             button_click.append(self.b5.rect.collidepoint(mouse_pos))
             for button in button_click:
                 if button:
-                    self.settings.hardness=button_click.index(True)+1
+                    self.settings.hardness=str(button_click.index(True)+1)
+                    self.settings.initialyse_dynamic_settings()
                     self.settings.ask=False
     def start_game(self):
         if self.stats.game_active:
