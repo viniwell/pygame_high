@@ -117,6 +117,7 @@ class AlienInvasion:
         """Обрабатывает нажатия клавиш и события мыши"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.set_record()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
@@ -127,7 +128,9 @@ class AlienInvasion:
                 if self.settings.ask:
                     self.check_buttons(mouse_pos)
                 self._check_play_button(mouse_pos)
-
+    def set_record(self):
+        with open('5/record.txt', 'w', encoding="UTF-8") as file:
+            file.write(str(self.stats.high_score))
 
     def _check_play_button(self, mouse_pos):
         button_click=self.play_button.rect.collidepoint(mouse_pos)
@@ -177,6 +180,7 @@ class AlienInvasion:
             elif event.key == pygame.K_LEFT:
                 self.ship.moving_left = True
             elif event.key == pygame.K_ESCAPE:
+                self.set_record()
                 sys.exit()
             elif event.key == pygame.K_SPACE:
                 self._fire_bullet()
